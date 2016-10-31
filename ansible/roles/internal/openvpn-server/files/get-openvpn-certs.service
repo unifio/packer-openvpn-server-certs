@@ -1,0 +1,14 @@
+[Unit]
+Description=Download openvpn certs from s3
+
+[Service]
+EnvironmentFile=/etc/openvpn/get-openvpn-certs.env
+Type=oneshot
+ExecStart=/usr/local/bin/aws s3 cp $OPENVPN_CERT_SOURCE /etc/openvpn/keys --recursive
+ExecReload=/usr/local/bin/aws s3 cp $OPENVPN_CERT_SOURCE /etc/openvpn/keys --recursive
+ExecStartPost=/bin/chmod 0700 -R /etc/openvpn/keys
+ExecStartPost=/bin/chmod 0644 /etc/openvpn/keys/crl.pem
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

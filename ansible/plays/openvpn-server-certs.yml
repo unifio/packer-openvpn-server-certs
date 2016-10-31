@@ -1,0 +1,10 @@
+---
+- name: Configure packer target with openvpn-server-pam-certs
+  become: true
+  gather_facts: true
+  hosts: default
+
+  roles:
+    - role: common
+    - role: openvpn-server
+      legos_openvpn_proto: tcp

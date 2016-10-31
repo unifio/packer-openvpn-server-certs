@@ -1,0 +1,9 @@
+---
+# Environments
+
+environments:
+  unifio-unstable:
+    - 'tf-state-bucket' #Atlas
+    - 'circle-ci'
+    - 'openvpn-cert-bucket'
+    - 'openvpn-server'

@@ -1,0 +1,58 @@
+---
+variables:
+  description: 'OpenVPN Server Image'
+  ansible-play: 'openvpn-server-certs'
+  serverspec: 'openvpn-server-certs'
+  slug: 'openvpn-pam'
+  version: "{{ uuid }}"
+  box_bucket: ''
+  region: 'ap-northeast-1'
+  source-ami: ''
+  ami_groups: ''
+  ami_regions: ''
+  ansible_plays_dir: "{{ env `ANSIBLE_PLAYS_DIR` }}"
+  ansible_role_paths: "{{ env `ANSIBLE_ROLE_PATHS` }}"
+  ansible_root_dir: "{{ env `ANSIBLE_ROOT_DIR` }}"
+
+description: "{{ user `description` }}"
+builders:
+  - type: 'amazon-ebs'
+    region: "{{ user `region` }}"
+    source_ami: "{{ user `source-ami` }}"
+    #iam_instance_profile: "packer"
+    instance_type: 'm3.medium'
+    enhanced_networking: true
+    ssh_username: 'admin'
+    ssh_pty: true
+    ami_name: "{{ user `slug` }}-{{ user `version` }}"
+    ami_description: "{{ user `description` }}"
+    ami_groups: "{{ user `ami_groups` }}"
+    ami_regions: "{{ user `ami_regions` }}"
+    tags:
+      App: "{{user `slug`}}"
+      Release: "{{ user `version` }}"
+provisioners:
+  - type: 'ansible-local'
+    playbook_file: "{{ user `ansible_plays_dir` }}/{{ user `ansible-play` }}.yml"
+    inventory_file: "{{ user `ansible_root_dir`}}/aws-local-inventory"
+    extra_arguments: ["-vv"]
+    role_paths: "{{ user `ansible_role_paths` }}"
+
+  - type: 'serverspec'
+    rake_file: 'Rakefile.serverspec'
+    rake_task: "serverspec:{{ user `serverspec` }}"
+    rake_env_vars: '$BUNDLE_GEMFILE=Gemfile'
+
+post-processors:
+  -
+    - type: 'vagrant'
+      output: "{{ user `slug` }}-{{ user `version` }}.box"
+
+    - type: 'vagrant-s3'
+      region: "{{user `region`}}"
+      bucket: "{{user `box_bucket`}}"
+      manifest: "{{ user `slug` }}"
+      box_name: "{{ user `slug` }}"
+      box_dir: 'boxes'
+      acl: 'authenticated-read'
+      version: "{{user `version`}}"

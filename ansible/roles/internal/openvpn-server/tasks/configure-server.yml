@@ -1,0 +1,37 @@
+---
+- name: setup download s3 cert one-shot service environment file
+  copy: src=get-openvpn-certs.env dest=/etc/openvpn/get-openvpn-certs.env mode=0600
+
+- name: Install download s3 cert one-shot service
+  copy: src=get-openvpn-certs.service dest=/etc/systemd/system/get-openvpn-certs.service mode=0644
+
+  #TODO: maybe tarball the existing files in keys to make this be able to run multiple times?
+- name: Make sure s3 cert one-shot service is ran manually
+  service: name=get-openvpn-certs.service enabled=no state=stopped
+
+- name: Setup LDAP
+  template:
+    src: auth-ldap.conf.j2
+    dest: "{{ legos_openvpn_etcdir }}/auth-ldap.conf"
+  when: legos_openvpn_use_ldap
+
+- name: Configure server
+  template:
+    src: server.conf.j2
+    dest: "{{ legos_openvpn_etcdir }}/server.conf"
+  notify:
+    - restart openvpn
+
+- name: Ensure openvpn key dir has the right permission
+  file:
+    path: "{{ legos_openvpn_keydir }}"
+    state: directory
+    mode: 0700
+    owner: "{{ legos_openvpn_user}}"
+
+- name: Install openvpn service
+  copy: src=openvpn@server.service dest=/etc/systemd/system/openvpn@server.service mode=0644
+  register: openvpn_service
+  notify:
+    - reload systemd
+    - restart openvpn

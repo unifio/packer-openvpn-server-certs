@@ -1,0 +1,41 @@
+---
+legos_openvpn_etcdir: "/etc/openvpn"
+legos_openvpn_keydir: "{{legos_openvpn_etcdir}}/keys"
+
+legos_openvpn_server_ip_range: 10.8.0.0 255.255.255.0
+legos_openvpn_port: 1194
+legos_openvpn_proto: udp
+legos_openvpn_dev: tun
+legos_openvpn_comp_lzo: yes                               # Enable compression
+legos_openvpn_verb: 3
+
+legos_openvpn_server_key_size: 4096
+
+#TODO: figure out if we can shove this to journald or something more useful
+legos_openvpn_status: openvpn-status.log
+legos_openvpn_max_clients: 25
+legos_openvpn_user: nobody
+
+# Additional server options
+# openvpn_server_options:
+  # - dev-node MyTap
+  # - client-to-client
+legos_openvpn_server_options:
+  - push "route {{ legos_openvpn_server_ip_range }}"
+  #  TODO: figure out how to maybe get a usable route in the packer build
+  #- push "route  ansible_default_ipv4["address"]  255.255.255.255 net_gateway"
+  - push "dhcp-option DNS 8.8.8.8"
+  - push "dhcp-option DNS 8.8.4.4"
+
+
+legos_openvpn_use_ldap: no
+#TODO: figure out how to get terraform to update this
+legos_openvpn_ldap_server: ldap.mycompany.net #Does not have to be externally resolvable, just within vpc
+legos_openvpn_ldap_bind_dn: 'user@mycompany.net'
+legos_openvpn_ldap_bind_password: password
+legos_openvpn_ldap_base_dn: ou=CorpAccounts,dc=mycompany,dc=net
+legos_openvpn_ldap_search_filter: '"sAMAccountName=%u"'
+legos_openvpn_ldap_group_search_filter: '"cn=OpenVPNUsers"'
+
+# IPtable rules can are in files/rules.v4
+legos_openvpn_forward_traffic: yes

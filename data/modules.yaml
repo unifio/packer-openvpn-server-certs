@@ -1,0 +1,36 @@
+---
+# Module parameters
+
+## Stack mappings
+
+### CI prerequisites
+circle-ci::module: 'modules/circle-ci'
+
+### S3 Bucket instances
+openvpn-cert-bucket::module: 'modules/s3-bucket'
+
+### OpenVPN instances
+openvpn-server::module: 'modules/openvpn-server'
+
+## State storage
+tf-state-bucket::state:
+  - atlas:
+      name: "unifio/%{hiera('stack_item_label')}-%{hiera('region')}-tfstate-bucket"
+
+openvpn-cert-bucket::state:
+  - s3:
+      bucket: "%{hiera('s3_state_bucket')}"
+      name: "%{hiera('region')}/openvpn-cert-bucket"
+      region: "%{hiera('region')}"
+
+circle-ci::state:
+  - s3:
+      bucket: "%{hiera('s3_state_bucket')}"
+      name: "%{hiera('region')}/circle-ci"
+      region: "%{hiera('region')}"
+
+openvpn-server::state:
+  - s3:
+      bucket: "%{hiera('s3_state_bucket')}"
+      name: "%{hiera('region')}/openvpn-server"
+      region: "%{hiera('region')}"

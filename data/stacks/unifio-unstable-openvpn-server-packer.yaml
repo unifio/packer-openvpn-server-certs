@@ -1,0 +1,6 @@
+---
+# OpenVPN Server Packer - Public
+
+openvpn-server::packer-module: 'modules/openvpn-server-certs'
+modules::openvpn-server-certs::packer-template: 'modules/openvpn-server-certs/aws-local-ansible.yml'
+modules::openvpn-server-certs::packer-vars-file: 'modules/openvpn-server-certs/public.yaml'

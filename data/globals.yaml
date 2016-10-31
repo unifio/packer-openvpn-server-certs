@@ -1,0 +1,62 @@
+---
+# Globals
+
+## AWS Lookups
+ebs_id_lookup: "$(aws ec2 describe-snapshots --region %{hiera('region')} --filters Name=tag:Name,Values=%{hiera('ebs_snapshot_name')} Name=progress,Values=100% | jq -r '.Snapshots|sort_by(.StartTime)|reverse|.[0]|.SnapshotId')"
+
+## S3 buckets
+modules::s3-bucket::vars:
+  region: "%{hiera('region')}"
+  stack_item_fullname: "%{hiera('stack_item_fullname')}"
+  stack_item_label: "%{hiera('stack_item_label')}"
+  manage_bucket: 1
+
+## Virtual Private Cloud (VPC)
+modules::vpc::vars:
+  domain_name: "%{hiera('domain_name')}"
+  hosted_zone_name: "%{hiera('domain_name')}"
+  region: "%{hiera('region')}"
+  stack_item_fullname: "%{hiera('stack_item_fullname')}"
+  stack_item_label: "%{hiera('stack_item_label')}"
+  sns_topic_subscribe: "VPN_ASG_EC2_Launch"
+  vgw_ids:
+    type: 's3.state'
+    bucket: "%{hiera('s3_state_bucket')}"
+    document: "%{hiera('region')}/vpg/terraform.tfstate"
+    key: 'vpg_id'
+
+## OpenVPN
+
+openvpn_end_point: 'vpn.odfdev.com'
+openvpn_s3_bucket: "tf-unifio-%{hiera('stack_item_label')}-openvpn-cert"
+
+### Server
+modules::openvpn-server::vars:
+  dns_name: "%{hiera('openvpn_end_point')}"
+  dmz_subnet_cidrs:
+    type: 's3.state'
+    bucket: "%{hiera('s3_state_bucket')}"
+    document: "%{hiera('region')}/vpc/terraform.tfstate"
+    key: 'dmz_subnet_cidrs'
+  key_name: "%{hiera('key_name')}"
+  lan_subnet_cidrs:
+    type: 's3.state'
+    bucket: "%{hiera('s3_state_bucket')}"
+    document: "%{hiera('region')}/vpc/terraform.tfstate"
+    key: 'lan_subnet_cidrs'
+  region: "%{hiera('region')}"
+  s3_bucket: "%{hiera('openvpn_s3_bucket')}"
+  s3_bucket_prefix: "%{hiera('openvpn_live_config_s3_key')}"
+  stack_item_fullname: "%{hiera('stack_item_fullname')}"
+  stack_item_label: "openvpn-%{hiera('stack_item_label')}"
+  subnets:
+    type: 's3.state'
+    bucket: "%{hiera('s3_state_bucket')}"
+    document: "%{hiera('region')}/vpc/terraform.tfstate"
+    key: 'dmz_subnet_ids'
+  vpc_id:
+    type: 's3.state'
+    bucket: "%{hiera('s3_state_bucket')}"
+    document: "%{hiera('region')}/vpc/terraform.tfstate"
+    key: 'vpc_id'
+

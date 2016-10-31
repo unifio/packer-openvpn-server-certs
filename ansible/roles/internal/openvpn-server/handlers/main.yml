@@ -1,0 +1,14 @@
+---
+- name: restart openvpn
+  service: name=openvpn state=restarted
+  notify: restart openvpn step 2
+
+- name: restart openvpn step 2
+  service: name=openvpn@server.service enabled=yes state=stopped
+
+- name: reload systemd
+  shell: systemctl daemon-reload
+  when: openvpn_service.changed
+
+- name: restart iptables
+  service: name=iptables.service enabled=yes state=restarted
