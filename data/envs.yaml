@@ -7,3 +7,4 @@ environments:
     - 'circle-ci'
     - 'openvpn-cert-bucket'
     - 'openvpn-server'
+    - 'openvpn-server-v2'

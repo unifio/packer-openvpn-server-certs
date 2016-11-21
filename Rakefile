@@ -11,7 +11,7 @@ require 'covalence/packer_tasks'
 
 ENV['ANSIBLE_ROOT_DIR'] ||= File.expand_path("ansible/", __dir__)
 ENV['ANSIBLE_PLAYS_DIR'] ||= File.join(ENV['ANSIBLE_ROOT_DIR'], "plays")
-ENV['ANSIBLE_ROLE_PATHS'] ||= Dir.glob("#{File.join(ENV['ANSIBLE_ROOT_DIR'], "roles")}/{external,internal}/*").join(",")
+ENV['ANSIBLE_ROLE_PATHS'] ||= Dir.glob("#{File.join(ENV['ANSIBLE_ROOT_DIR'], "roles")}/{archive,external,internal}/*").join(",")
 
 task :serverspec => 'serverspec:all'
 task :default => :serverspec

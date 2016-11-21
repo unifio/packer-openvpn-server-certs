@@ -1,0 +1,9 @@
+---
+# OpenVPN Server Packer - Public
+
+openvpn-server-v2::packer-module: 'modules/openvpn-server-certs-v2'
+modules::openvpn-server-certs-v2::packer-template: 'modules/openvpn-server-certs-v2/aws-local-ansible.yml'
+modules::openvpn-server-certs-v2::packer-vars-file: 'modules/openvpn-server-certs-v2/public.yaml'
+modules::openvpn-server-certs-v2::packer-targets:
+  docker: 'docker'
+  amazon-ebs: 'amazon-ebs'
