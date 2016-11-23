@@ -1,0 +1,3 @@
+[submodule "ansible/roles/unifio-shared"]
+	path = ansible/roles/unifio-shared
+	url = git@github.com:unifio/ansible-roles-submodule.git

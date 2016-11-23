@@ -32,59 +32,29 @@ builders:
     tags:
       App: "{{user `slug`}}"
       Release: "{{ user `version` }}"
-  - type: 'docker'
-    #image: 'minimum2scp/systemd-jessie'
-    image: 'debian:jessie'
-    commit: true
-    run_command: [ "-d", "-i", "-t", "--name", "{{user `ansible_host`}}", "{{.Image}}", "/bin/bash" ]
 
 provisioners:
-
-  - type: "shell"
-    inline:
-      - 'apt-get update'
-      - 'apt-get install -y python aptitude'
-      - 'apt-get install -y build-essential libssl-dev libffi-dev python-dev libpython2.7-dev'
-      - 'apt-get -y --purge remove python-cffi'
-    only:
-      - 'docker'
-
-  #- type: 'ansible-local'
-    #playbook_file: "{{ user `ansible_plays_dir` }}/{{ user `ansible-play` }}.yml"
-    #inventory_file: "{{ user `ansible_root_dir`}}/aws-local-inventory"
-    #extra_arguments: ["-vv"]
-    #role_paths: "{{ user `ansible_role_paths` }}"
-
-  - type: 'ansible'
-    playbook_file: "./ansible/plays/{{ user `ansible-play` }}.yml"
-    #inventory_file: "{{ user `ansible_root_dir`}}/aws-local-inventory"
+  - type: 'ansible-local'
+    playbook_file: "{{ user `ansible_plays_dir` }}/{{ user `ansible-play` }}.yml"
+    inventory_file: "{{ user `ansible_root_dir`}}/aws-local-inventory"
     extra_arguments: ["-vv"]
-    ansible_env_vars:
-      - "ANSIBLE_ROLES_PATH=:{{ template_dir }}/../../../ansible/roles/internal/:{{ template_dir }}/../../../ansible/roles/external/"
-      - "ANSIBLE_HOST_KEY_CHECKING=False"
-    extra_arguments:
-      - "--extra-vars"
-      - "ansible_host={{user `ansible_host`}} ansible_connection=docker ansible_user=root"
-      #- "ansible_host=default"
-
-      #- "ansible_user=root"
-    #role_paths: "{{ user `ansible_role_paths` }}"
+    role_paths: "{{ user `ansible_role_paths` }}"
 
   - type: 'serverspec'
     rake_file: 'Rakefile.serverspec'
     rake_task: "serverspec:{{ user `serverspec` }}"
     rake_env_vars: '$BUNDLE_GEMFILE=Gemfile'
 
-#post-processors:
-  #-
-    #- type: 'vagrant'
-      #output: "{{ user `slug` }}-{{ user `version` }}.box"
+post-processors:
+  -
+    - type: 'vagrant'
+      output: "{{ user `slug` }}-{{ user `version` }}.box"
 
-    #- type: 'vagrant-s3'
-      #region: "{{user `region`}}"
-      #bucket: "{{user `box_bucket`}}"
-      #manifest: "{{ user `slug` }}"
-      #box_name: "{{ user `slug` }}"
-      #box_dir: 'boxes'
-      #acl: 'authenticated-read'
-      #version: "{{user `version`}}"
+    - type: 'vagrant-s3'
+      region: "{{user `region`}}"
+      bucket: "{{user `box_bucket`}}"
+      manifest: "{{ user `slug` }}"
+      box_name: "{{ user `slug` }}"
+      box_dir: 'boxes'
+      acl: 'authenticated-read'
+      version: "{{user `version`}}"

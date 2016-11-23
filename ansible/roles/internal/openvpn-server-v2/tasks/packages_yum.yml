@@ -1,0 +1,9 @@
+---
+
+- name: Install openvpn packages
+  yum: name={{ item }} state=present enablerepo=epel
+  with_items:
+    - openvpn
+
+# THis can actually be done
+- fail: msg="RedHat implementation is incomplete"

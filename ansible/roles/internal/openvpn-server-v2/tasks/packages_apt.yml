@@ -1,0 +1,23 @@
+---
+- name: Add openvpn apt-repo signing key
+  apt_key:
+    url: https://swupdate.openvpn.net/repos/repo-public.gpg
+    state: present
+
+- name: Add openvpn repository
+  apt_repository:
+    repo: "deb http://build.openvpn.net/debian/openvpn/stable jessie main"
+    state: present
+    filename: "openvpn"
+    update_cache: "yes"
+
+- name: Install packages
+  apt: pkg="{{ item }}" state=latest force=yes
+  with_items:
+    - openvpn
+    - udev
+    - iptables
+
+- name: Install awscli via pip
+  pip: name=awscli
+  become: True

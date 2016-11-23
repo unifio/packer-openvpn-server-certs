@@ -40,9 +40,16 @@ builders:
       Release: "{{ user `version` }}"
 
   - type: 'docker'
-    image: "unifio/debian-base:{{ use `source_ami_version` }}"
+    image: "unifio/debian-base:{{ user `source_ami_version` }}"
     commit: true
-    run_command: [ "-d", "-i", "-t", "--name", "{{user `ansible_host`}}", "{{.Image}}", "/bin/bash" ]
+    run_command:
+     - "-d"
+     - "-it"
+     - "--cap-add=NET_ADMIN"
+     - "--name={{user `slug`}}"
+     #- "--privileged"
+     - "{{.Image}}"
+     - "/bin/bash"
 
 provisioners:
   - type: "shell"
@@ -57,16 +64,16 @@ provisioners:
     playbook_file: "./ansible/plays/{{ user `ansible-play` }}.yml"
     extra_arguments: ["-vv"]
     ansible_env_vars:
-      - "ANSIBLE_ROLES_PATH=:./ansible/roles/internal/:./ansible/roles/external/:./ansible/roles/archive/"
+      - "ANSIBLE_ROLES_PATH=:./ansible/roles/internal/:./ansible/roles/unifio-shared/:./ansible/roles/archive/"
       - "ANSIBLE_HOST_KEY_CHECKING=False"
     except:
       - "docker"
 
   - type: 'ansible'
-    playbook_file: "./ansible/plays/{{ user `ansible_play` }}.yml"
+    playbook_file: "./ansible/plays/{{ user `ansible-play` }}.yml"
     extra_arguments: ["-vv"]
     ansible_env_vars:
-      - "ANSIBLE_ROLES_PATH=:./ansible/roles/internal/:./ansible/roles/external/:./ansible/roles/archive/"
+      - "ANSIBLE_ROLES_PATH=:./ansible/roles/internal/:./ansible/roles/unifio-shared/:./ansible/roles/archive/"
       - "ANSIBLE_HOST_KEY_CHECKING=False"
     extra_arguments:
       - "--extra-vars"
@@ -74,12 +81,18 @@ provisioners:
     only:
       - "docker"
 
-  - type: 'serverspec'
-    rake_file: 'Rakefile.serverspec'
-    rake_task: "serverspec:{{ user `serverspec` }}"
-    rake_env_vars: '$BUNDLE_GEMFILE=Gemfile'
+  #- type: 'serverspec'
+    #rake_file: 'Rakefile.serverspec'
+    #rake_task: "serverspec:{{ user `serverspec` }}"
+    #rake_env_vars: '$BUNDLE_GEMFILE=Gemfile'
 
-#post-processors:
+post-processors:
+  -
+    - type: 'docker-tag'
+      repository: 'unifio/openvpn-server'
+      #tag: "{{ user `version` }}"
+      only:
+        - 'docker'
   #-
     #- type: 'vagrant'
       #output: "{{ user `slug` }}-{{ user `version` }}.box"

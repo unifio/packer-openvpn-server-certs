@@ -5,5 +5,5 @@
   hosts: default
 
   roles:
-    - role: openvpn-server
-      legos_openvpn_proto: tcp
+    - role: shared_handlers
+    - role: openvpn-server-v2

@@ -1,0 +1,18 @@
+---
+- include: packages_yum.yml
+  when: ansible_os_family == 'RedHat'
+
+- include: packages_apt.yml
+  when: ansible_os_family == 'Debian'
+
+- include: configure-server.yml
+
+- include: forward-traffic.yml
+  when: legos_openvpn_forward_traffic
+
+- name: Copy docker run script
+  copy:
+    src: entrypoint.sh
+    dest: /usr/local/bin/entrypoint.sh
+    mode: 0755
+  when: "ansible_connection == 'docker'"

@@ -1,0 +1,3 @@
+---
+legos_openvpn_use_ldap_plugin_distribution: /usr/lib/openvpn/openvpn-auth-ldap.so
+
